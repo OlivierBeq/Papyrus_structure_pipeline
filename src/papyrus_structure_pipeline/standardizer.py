@@ -129,7 +129,7 @@ def standardize(mol: Chem.Mol,
 
 
 def _apply_chembl_standardization(mol: Chem.Mol) -> Chem.Mol:
-    """Apply the ChEMBL structure standardization pipeline from either a RDKit molecule or SMILES.
+    """Apply the ChEMBL structure standardization pipeline to a RDKit molecule.
 
     :param mol: RDKit molecule to be standardized
     """
@@ -153,7 +153,7 @@ def _apply_chembl_standardization(mol: Chem.Mol) -> Chem.Mol:
 
 
 def _canonicalize_tautomer(mol: Chem.Mol, allow_stereo_removal: bool = True, max_tautomers: int = 2 ** 32 - 1) -> Chem.Mol:
-    """Obtain the RDKit canonical tautomer of the given molecule."""
+    """Obtain the RDKit canonical tautomer of the given RDKit molecule."""
     if mol is None:
         raise ValueError('A RDKit molecule must be specified')
     # Parameter of tautomer enumeration
@@ -180,12 +180,12 @@ def _canonicalize_tautomer(mol: Chem.Mol, allow_stereo_removal: bool = True, max
 
 
 def is_organic(mol: Chem.Mol, return_type: bool = False) -> Union[bool, Tuple[bool, InorganicSubtype]]:
-    """Return whether the molecule is organic or not.
+    """Return whether the RKDit molecule is organic or not.
 
     Makes use of the `ORGANIC_ATOMS` variable to identify inorganic atoms.
 
     :param return_type: If True, include the `InorganicSubtype` in the return value
-    :return: True if return_type is True and the molecule has no exclusion lag
+    :return: True if return_type is True and the molecule has no exclusion flag
     set by the `chembl_structure_pipeline`, has at least one C-C bond and is only
     made of C, H, O, N, P, S and halogen atoms.
     """
@@ -209,7 +209,7 @@ def is_small_molecule(mol: Chem.Mol,
                       min_molwt: float = 200,
                       max_molwt: float = 800,
                       ) -> bool:
-    """Return whether the molecule is a 'small molecule'.
+    """Return whether the RDKit molecule is a 'small molecule'.
 
     :param mol: molecule to examine
     :param min_molwt: molecular weight under which the molecule is not considered a small molecule
