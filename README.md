@@ -16,7 +16,7 @@ From source:
 with pip:
 
 ```bash
-pip install https://github.com/OlivierBeq/papyrus_structure_pipeline/tarball/master
+pip install papyrus_structure_pipeline
 ```
 
 ## Usage
