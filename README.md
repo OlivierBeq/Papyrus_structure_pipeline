@@ -16,7 +16,7 @@ From source:
 with pip:
 
 ```bash
-pip install papyrus_structure_pipeline
+pip install papyrus-structure-pipeline
 ```
 
 ## Usage
