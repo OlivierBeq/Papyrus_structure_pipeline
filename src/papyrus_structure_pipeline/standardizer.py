@@ -9,19 +9,21 @@
 #  which is included in the file LICENSE, found at the root
 #  of the source tree.
 
-import warnings
+"""Standardizing methods."""
+
 from enum import Enum, auto
 from typing import Optional, Tuple, Union
 
-from rdkit import Chem
-from rdkit.Chem import AllChem
-from rdkit.rdBase import  BlockLogs
-from rdkit.Chem.MolStandardize.rdMolStandardize import TautomerEnumerator
 from chembl_structure_pipeline import standardizer
 from chembl_structure_pipeline.exclude_flag import exclude_flag
+from rdkit import Chem
+from rdkit.Chem import AllChem
+from rdkit.Chem.MolStandardize.rdMolStandardize import TautomerEnumerator
+from rdkit.rdBase import BlockLogs
 
 
 class StandardizationResult(Enum):
+    """Result of the standardization process."""
     CORRECT_MOLECULE = auto()
     NON_SMALL_MOLECULE = auto()
     INORGANIC_MOLECULE = auto()
@@ -29,12 +31,15 @@ class StandardizationResult(Enum):
 
 
 class InorganicSubtype(Enum):
+    """Reason the compound is deemed inorganic."""
     IS_ORGANIC = auto()
     NO_CC_BOND = auto()
     NOT_CHONPSFClIBrB = auto()
     EXCLUSION_FLAG_SET = auto()  # molecule was flagged by the ChEMBL Structure Pipeline
 
+
 class SaltStrippingResult(Enum):
+    """Result of removing salts, metals and additional substructures."""
     STRIPPED_MOLECULE = auto()
     EMPTY_MOLECULE = auto()
 
@@ -147,12 +152,13 @@ def _apply_chembl_standardization(mol: Chem.Mol) -> Chem.Mol:
         del block  # Re-enable them
         if standardized_mol is None:
             raise ValueError(f'Could not parse standardized SMILES: {standardized_smiles}')
-    except:
-        raise ValueError(f'Could not parse standardized SMILES: {standardized_smiles}')
+    except Exception as e:
+        raise ValueError(f'Could not parse standardized SMILES: {standardized_smiles}') from e
     return standardized_mol
 
 
-def _canonicalize_tautomer(mol: Chem.Mol, allow_stereo_removal: bool = True, max_tautomers: int = 2 ** 32 - 1) -> Chem.Mol:
+def _canonicalize_tautomer(mol: Chem.Mol, allow_stereo_removal: bool = True,
+                           max_tautomers: int = 2 ** 32 - 1) -> Chem.Mol:
     """Obtain the RDKit canonical tautomer of the given RDKit molecule."""
     if mol is None:
         raise ValueError('A RDKit molecule must be specified')
@@ -165,9 +171,15 @@ def _canonicalize_tautomer(mol: Chem.Mol, allow_stereo_removal: bool = True, max
     else:
         enumerator.SetRemoveSp3Stereo(False)
         tautos = enumerator.Enumerate(mol)
+
         # Keep those with stereo unchanged if required
-        get_num_ciral_centers = lambda mol: len([atom.GetChiralTag() for atom in mol.GetAtoms()
-                                                 if atom.GetChiralTag() != AllChem.ChiralType.CHI_UNSPECIFIED])
+
+        def get_num_ciral_centers(mol_: Chem.Mol):
+            """Utility function."""
+            return len([atom.GetChiralTag()
+                        for atom in mol_.GetAtoms()
+                        if atom.GetChiralTag() != AllChem.ChiralType.CHI_UNSPECIFIED])
+
         orig_chiral_centers = get_num_ciral_centers(mol)
         if orig_chiral_centers > 0:
             tautos = [tauto for tauto in tautos
@@ -184,6 +196,7 @@ def is_organic(mol: Chem.Mol, return_type: bool = False) -> Union[bool, Tuple[bo
 
     Makes use of the `ORGANIC_ATOMS` variable to identify inorganic atoms.
 
+    :param mol: RDKit molecule
     :param return_type: If True, include the `InorganicSubtype` in the return value
     :return: True if return_type is True and the molecule has no exclusion flag
     set by the `chembl_structure_pipeline`, has at least one C-C bond and is only
@@ -201,8 +214,8 @@ def is_organic(mol: Chem.Mol, return_type: bool = False) -> Union[bool, Tuple[bo
     # Ensure contains only C, H, O, N, P, S and halogens
     global ORGANIC_ATOMS
     if len(set(atom.GetSymbol() for atom in mol.GetAtoms()).difference(set(ORGANIC_ATOMS))):
-        return False  if not return_type else (False, InorganicSubtype.NOT_CHONPSFClIBrB)
-    return True  if not return_type else (True, InorganicSubtype.IS_ORGANIC)
+        return False if not return_type else (False, InorganicSubtype.NOT_CHONPSFClIBrB)
+    return True if not return_type else (True, InorganicSubtype.IS_ORGANIC)
 
 
 def is_small_molecule(mol: Chem.Mol,
@@ -260,12 +273,9 @@ def _remove_supplementary_salts(mol: Chem.Mol,
     keep = [1] * len(frags)
     for i, frag in enumerate(frags):
         for salt in salts:
-            if (keep[i]
-                and frag.GetNumAtoms() == salt.GetNumAtoms()
-                and frag.GetNumBonds() == salt.GetNumBonds()
-                and frag.HasSubstructMatch(salt)
-                and salt.HasSubstructMatch(frag)
-            ):
+            if (keep[i] and frag.GetNumAtoms() == salt.GetNumAtoms()
+                    and frag.GetNumBonds() == salt.GetNumBonds() and frag.HasSubstructMatch(salt)
+                    and salt.HasSubstructMatch(frag)):
                 keep[i] = 0
             if not max(keep):
                 # All was removed, return initial molecule

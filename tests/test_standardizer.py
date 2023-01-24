@@ -53,7 +53,8 @@ class TestStandardizer(unittest.TestCase):
     def test_standardizer_mixture_pass(self):
         self.assertEqual(standardizer.standardize(MOLECULES['cisplatin'], filter_mixtures=False, return_type=True)[1],
                          standardizer.StandardizationResult.INORGANIC_MOLECULE)
-        self.assertIsNotNone(standardizer.standardize(MOLECULES['cisplatin'], filter_mixtures=False, filter_inorganic=False))
+        self.assertIsNotNone(standardizer.standardize(MOLECULES['cisplatin'], filter_mixtures=False,
+                                                      filter_inorganic=False))
 
     def test_standardizer_tautomer(self):
         mol = Chem.MolFromSmiles('OC1=NC(=O)[C@H](C=C1)N1C(=O)C2=CC=CCC2=C1O')

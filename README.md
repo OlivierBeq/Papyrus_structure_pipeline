@@ -135,7 +135,7 @@ def standardize(mol,
 - ***filter_mixtures  : bool***  
     Return `None` if the molecule is a mixture.  
 - ***filter_inorganic  : bool***  
-    Return `None` if the molecule is a inorganic.
+    Return `None` if the molecule is inorganic.
 - ***filter_non_small_molecule  : bool***  
     Return `None` if the molecule is not a small molecule.
 - ***canonicalize_tautomer  : bool***  
