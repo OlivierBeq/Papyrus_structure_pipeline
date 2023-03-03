@@ -172,6 +172,7 @@ def _canonicalize_tautomer(mol: Chem.Mol, allow_stereo_removal: bool = True,
     # Parameter of tautomer enumeration
     enumerator = TautomerEnumerator()
     enumerator.SetMaxTautomers(max_tautomers)
+    block = BlockLogs()  # Disable RDKit outputs
     # Enumerate tautomers
     if allow_stereo_removal:
         tautos = enumerator.Enumerate(mol)
@@ -193,6 +194,7 @@ def _canonicalize_tautomer(mol: Chem.Mol, allow_stereo_removal: bool = True,
                       if get_num_ciral_centers(tauto) == orig_chiral_centers]
     # Determine canonical tautomer
     can_tauto = enumerator.PickCanonical(tautos)
+    del block  # Re-enable them
     if can_tauto is not None:
         return can_tauto
     raise ValueError(f'Could not obtain canonical tautomer: {Chem.MolToSmiles(mol)}')
