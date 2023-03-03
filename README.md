@@ -120,7 +120,8 @@ def standardize(mol,
                 remove_additional_salts=True, remove_additional_metals=True,
                 filter_mixtures=True, filter_inorganic=True, filter_non_small_molecule=True,
                 canonicalize_tautomer=True, small_molecule_min_mw=200, small_molecule_max_mw=800,
-                tautomer_allow_stereo_removal=True, tautomer_max_tautomers=0, return_type=False
+                tautomer_allow_stereo_removal=True, tautomer_max_tautomers=0, return_type=False,
+                raise_error=True
                 ) -> Chem.Mol:
 ```
 
@@ -149,7 +150,9 @@ def standardize(mol,
 - ***tautomer_max_tautomers  : int (< 2 <sup>32</sup>)***  
     Maximum number of tautomers to consider by the tautomer search algorithm.
 - ***return_type  : bool***  
-    Add a StandardizationResult to the return value. 
+    Add a StandardizationResult to the return value.
+- ***raise_error  : bool***
+    Raise an exception upon failure, otherwise return None
 
 ________________
 

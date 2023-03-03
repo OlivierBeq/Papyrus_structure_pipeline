@@ -28,6 +28,7 @@ class StandardizationResult(Enum):
     NON_SMALL_MOLECULE = auto()
     INORGANIC_MOLECULE = auto()
     MIXTURE_MOLECULE = auto()
+    STANDARDIZATION_ERROR = auto()
 
 
 class InorganicSubtype(Enum):
@@ -75,7 +76,8 @@ def standardize(mol: Chem.Mol,
                 small_molecule_max_mw: float = 800,
                 tautomer_allow_stereo_removal: bool = True,
                 tautomer_max_tautomers: int = 2 ** 32 - 1,
-                return_type: bool = False
+                return_type: bool = False,
+                raise_error: bool = True
                 ) -> Union[Chem.Mol, Tuple[Optional[Chem.Mol], StandardizationResult]]:
     """Standardize a molecule from either a RDKit molecule or SMILES.
 
@@ -116,7 +118,7 @@ def standardize(mol: Chem.Mol,
         # Ensure organic
         if filter_inorganic and not is_organic(std_mol):
             return (None, StandardizationResult.INORGANIC_MOLECULE) if return_type else None
-            # Ensure small molecule
+        # Ensure small molecule
         if filter_non_small_molecule and not is_small_molecule(std_mol,
                                                                min_molwt=small_molecule_min_mw,
                                                                max_molwt=small_molecule_max_mw):
@@ -130,7 +132,12 @@ def standardize(mol: Chem.Mol,
         final_mol = _apply_chembl_standardization(std_mol)
         return (final_mol, StandardizationResult.CORRECT_MOLECULE) if return_type else final_mol
     except Exception as e:
-        raise RuntimeError('Molecule could not be standardized') from e
+        if raise_error:
+            raise RuntimeError('Molecule could not be standardized') from e
+        elif return_type:
+            return (None, StandardizationResult.STANDARDIZATION_ERROR)
+        else:
+            return None
 
 
 def _apply_chembl_standardization(mol: Chem.Mol) -> Chem.Mol:
