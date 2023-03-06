@@ -14,12 +14,15 @@
 from enum import Enum, auto
 from typing import Optional, Tuple, Union
 
-from chembl_structure_pipeline import standardizer
-from chembl_structure_pipeline.exclude_flag import exclude_flag
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem.MolStandardize.rdMolStandardize import TautomerEnumerator
 from rdkit.rdBase import BlockLogs
+
+# Remove warnings of importing the ChEMBL Structure Pipeline
+with BlockLogs():
+    from chembl_structure_pipeline import standardizer
+    from chembl_structure_pipeline.exclude_flag import exclude_flag
 
 
 class StandardizationResult(Enum):
@@ -169,10 +172,10 @@ def _canonicalize_tautomer(mol: Chem.Mol, allow_stereo_removal: bool = True,
     """Obtain the RDKit canonical tautomer of the given RDKit molecule."""
     if mol is None:
         raise ValueError('A RDKit molecule must be specified')
+    block = BlockLogs()  # Disable RDKit outputs
     # Parameter of tautomer enumeration
     enumerator = TautomerEnumerator()
     enumerator.SetMaxTautomers(max_tautomers)
-    block = BlockLogs()  # Disable RDKit outputs
     # Enumerate tautomers
     if allow_stereo_removal:
         tautos = enumerator.Enumerate(mol)
