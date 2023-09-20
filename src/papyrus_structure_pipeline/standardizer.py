@@ -319,6 +319,7 @@ def _uncharge(mol: Chem.Mol) -> Chem.Mol:
     """
     if mol is None:
         raise ValueError('A RDKit molecule must be specified')
+    block = BlockLogs()
     uncharger = Uncharger()
     mol = uncharger.uncharge(mol)
     # Do a second pass on zwitterions
@@ -349,4 +350,5 @@ def _uncharge(mol: Chem.Mol) -> Chem.Mol:
             romol = rms[0]
     mol = Chem.Mol(romol)
     Chem.SanitizeMol(mol)
+    del block
     return mol
